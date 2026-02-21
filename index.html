@@ -64,13 +64,47 @@
     <div id="match-list" class="grid"></div>
 
     <script>
-        // 1. DATABASE (Update these with real scores later!)
-        const matchData = [
-            { home: "Mauritius", away: "France", hFlag: "mu", aFlag: "fr", time: "18:00", realH: 2, realA: 1 },
-            { home: "Malaysia", away: "Brazil", hFlag: "my", aFlag: "br", time: "21:00", realH: 0, realA: 3 },
-            { home: "USA", away: "Mexico", hFlag: "us", aFlag: "mx", time: "02:00", realH: 1, realA: 1 },
-            { home: "Canada", away: "England", hFlag: "ca", aFlag: "gb", time: "15:00", realH: 0, realA: 2 }
-        ];
+
+        // 1. DATABASE (Now pulling live data!)
+let matchData = [];
+
+async function loadMatches() {
+    const res = await fetch("https://api.football-data.org/v4/matches", {
+        headers: { "X-Auth-Token": "ff8fb7f5d23b475591e9a186ae9518fe" } // your key
+    });
+    const data = await res.json();
+    matchData = data.matches;
+    renderMatches(); // <-- call the function after data loads
+}
+
+// Call once at start
+loadMatches();
+
+// Refresh every 60 seconds
+setInterval(loadMatches, 60000);
+
+// ---------------------------
+// Separate function (NOT inside loadMatches)
+function renderMatches() {
+    const list = document.getElementById('match-list');
+    list.innerHTML = ""; 
+    matchData.forEach((match, i) => {
+        list.innerHTML += `
+            <div class="card">
+                <span style="color:gray; font-size:11px;">Kickoff: ${new Date(match.utcDate).toLocaleString()}</span>
+                <div class="flag-box">
+                    <div><br>${match.homeTeam.name}</div>
+                    <div style="color:var(--gold);">VS</div>
+                    <div><br>${match.awayTeam.name}</div>
+                </div>
+                <input type="number" id="uH-${i}" placeholder="0"> - <input type="number" id="uA-${i}" placeholder="0">
+                <button class="btn-predict" onclick="check(${i})">CHECK RESULT</button>
+                <p id="res-${i}" style="font-size:12px; margin-top:10px;"></p>
+            </div>`;
+    });
+}
+
+
 
         // 2. LOGIN & MEMORY
         let userName = localStorage.getItem("wc_user") || prompt("Enter your name to start predicting:");
@@ -106,27 +140,33 @@
         }
 
         // 4. CHECK LOGIC & REWARD
-       function check(i) {
+      function check(i) {
     const h = parseInt(document.getElementById(`uH-${i}`).value);
     const a = parseInt(document.getElementById(`uA-${i}`).value);
     const msg = document.getElementById(`res-${i}`);
     const m = matchData[i];
 
-    if (m.realH === null || m.realA === null) {
+    // If the match hasn't been played yet
+    if (m.score.fullTime.home === null || m.score.fullTime.away === null) {
         msg.innerText = "Match scheduled soon!";
         msg.style.color = "gray";
-    } else if (h === m.realH && a === m.realA) {
+    } 
+    // If the prediction is correct
+    else if (h === m.score.fullTime.home && a === m.score.fullTime.away) {
         msg.innerText = "✅ Correct prediction!";
         msg.style.color = "#2ecc71";
         correctCount++;
         localStorage.setItem("wc_score", correctCount);
         updateStatus();
         if (correctCount % 3 === 0) showReward();
-    } else {
-        msg.innerText = `❌ No, it was ${m.realH}-${m.realA}`;
+    } 
+    // If the prediction is wrong
+    else {
+        msg.innerText = `❌ No, it was ${m.score.fullTime.home}-${m.score.fullTime.away}`;
         msg.style.color = "#e74c3c";
     }
 }
+
 
 
         function showReward() {
