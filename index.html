@@ -106,21 +106,28 @@
         }
 
         // 4. CHECK LOGIC & REWARD
-        function check(i) {
-            const h = document.getElementById(`uH-${i}`).value;
-            const a = document.getElementById(`uA-${i}`).value;
-            const msg = document.getElementById(`res-${i}`);
-            const m = matchData[i];
+       function check(i) {
+    const h = parseInt(document.getElementById(`uH-${i}`).value);
+    const a = parseInt(document.getElementById(`uA-${i}`).value);
+    const msg = document.getElementById(`res-${i}`);
+    const m = matchData[i];
 
-            if (m.realH === null) {
-    msg.innerText = "Match scheduled soon!";
-    msg.style.color = "gray";
+    if (m.realH === null || m.realA === null) {
+        msg.innerText = "Match scheduled soon!";
+        msg.style.color = "gray";
+    } else if (h === m.realH && a === m.realA) {
+        msg.innerText = "✅ Correct prediction!";
+        msg.style.color = "#2ecc71";
+        correctCount++;
+        localStorage.setItem("wc_score", correctCount);
+        updateStatus();
+        if (correctCount % 3 === 0) showReward();
+    } else {
+        msg.innerText = `❌ No, it was ${m.realH}-${m.realA}`;
+        msg.style.color = "#e74c3c";
+    }
 }
-            } else {
-                msg.innerText = `❌ No, it was ${m.realH}-${m.realA}`;
-                msg.style.color = "#e74c3c";
-            }
-        }
+
 
         function showReward() {
             const t = document.getElementById('trophy-overlay');
