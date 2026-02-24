@@ -59,18 +59,23 @@
   <script>
     let matchData = [];
 
-    async function loadMatches() {
-      try {
-        const res = await fetch("https://api.football-data.org/v4/competitions/WC/matches", { headers: { "X-Auth-Token": "ff8fb7f5d23b475591e9a186ae9518fe" } });
-        const data = await res.json();
-        matchData = data.matches;
-        renderMatches();
-        updateStatus();
-      } catch (err) {
-        console.error("Error loading matches:", err);
+async function loadMatches() {
+  try {
+    const res = await fetch("https://cors-anywhere.herokuapp.com/https://api.football-data.org/v4/competitions/WC/matches", {
+      headers: { 
+        "X-Auth-Token": "ff8fb7f5d23b475591e9a186ae9518fe",
+        "Origin": "https://archishatech.github.io"
       }
-    }
-    function renderMatches() {
+    });
+    const data = await res.json();
+    matchData = data.matches;
+    renderMatches();
+  } catch (err) {
+    console.error("Error loading matches:", err);
+  }
+}
+
+function renderMatches() {
       const list = document.getElementById('match-list');
       list.innerHTML = ""; 
       matchData.forEach((match, i) => {
