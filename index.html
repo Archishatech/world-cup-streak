@@ -61,7 +61,7 @@
 
     async function loadMatches() {
       try {
-        const res = await fetch("https://api.football-data.org/v4/competitions/WC/matches", { headers: { "X-Auth-Token": "ff8fb7f5d23b475591e9a186ae9518fe" } }).
+        const res = await fetch("https://api.football-data.org/v4/competitions/WC/matches", { headers: { "X-Auth-Token": "ff8fb7f5d23b475591e9a186ae9518fe" } });
         const data = await res.json();
         matchData = data.matches;
         renderMatches();
@@ -70,8 +70,7 @@
         console.error("Error loading matches:", err);
       }
     }
-
-    function renderMatches() 
+    function renderMatches() {
       const list = document.getElementById('match-list');
       list.innerHTML = ""; 
       matchData.forEach((match, i) => {
